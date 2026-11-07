@@ -105,7 +105,7 @@ function drawHouse(x,y,scale=1,kind='home',roofFixed=false,occupied=true){
 }
 function draw(){
  const w=3000,h=410,t=animFrame/60,night=(Math.sin(t*.16)<-.15),winter=s.day>=274,autumn=s.day>=182&&s.day<274;
- const cameraX=s.street?(s.forest?1500:s.school?1400:s.shop?1250:s.credit?1250:1000):0;ctx.save();ctx.translate(-cameraX,0);
+ const cameraX=(s.street||s.credit||s.farm||s.shop||s.school||s.forest)?(s.forest?1500:s.school?1400:s.shop?1250:s.credit?1250:s.farm?1650:1000):0;ctx.save();ctx.translate(-cameraX,0);
  ctx.clearRect(0,0,w,h);
  let sky=ctx.createLinearGradient(0,0,0,320);sky.addColorStop(0,night?'#071326':'#102d50');sky.addColorStop(1,night?'#25364d':winter?'#8397a9':'#4b7180');ctx.fillStyle=sky;ctx.fillRect(0,0,w,320);
  // stars and moon / sun
