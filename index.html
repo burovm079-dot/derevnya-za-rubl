@@ -131,8 +131,44 @@ function draw(){
  if(s.school){drawHouse(490,210,1.15,'school');if(s.schoolChildren){for(let c=0;c<Math.min(8,s.schoolChildren);c++){let cx=510+c*15;rect(cx,290+Math.sin(t*5+c)*2,6,9,'#e4b18a');rect(cx-1,299+Math.sin(t*5+c)*2,8,10,'#4c8ead')}}if(s.bus){let bx=((t*28)%1180)-100;rect(bx,302,72,25,'#e6b83e');for(let j=0;j<4;j++)rect(bx+6+j*16,306,12,10,'#91c4d3');ctx.fillStyle='#171b20';ctx.beginPath();ctx.arc(bx+15,329,7,0,7);ctx.arc(bx+59,329,7,0,7);ctx.fill()}}
  if(s.modular){for(let i=0;i<4;i++){let x=55+i*112;rect(x,235,88,67,'#d8e0df');rect(x-4,227,96,10,'#8799a4');rect(x+10,250,18,18,'#9bc4d0');rect(x+58,250,18,18,'#9bc4d0')}}
  if(s.forest){rect(865,205,105,83,'#71523a');rect(857,196,121,12,'#586d4e');for(let i=0;i<4;i++)rect(875+i*20,245,13,35,'#b68b57')}
- // moving people, pixel-art characters with walking legs
- let peopleCount=Math.min(30,Math.max(1,s.people));for(let i=0;i<peopleCount;i++){let x=((i*77+t*(11+(i%3)*4))%(w+40))-20,y=296+(i%3)*7,bob=Math.sin(t*7+i)*2;rect(x-4,y-20+bob,9,10,'#e2b38c');rect(x-6,y-10+bob,13,15,['#e59b46','#4b91aa','#a95652','#d0bd53','#4e8a67'][i%5]);rect(x-5,y+5+bob,4,9,'#283342');rect(x+2,y+5+bob,4,9,'#283342')}
+ // Жители привязаны к своим домам: возле каждого заселённого дома видна семья.
+ // Часть людей спокойно стоит у калитки, часть выходит на улицу и идёт по делам.
+ let occupiedHouses=Math.min(20,Math.ceil(s.people/5));
+ for(let hIndex=0;hIndex<occupiedHouses;hIndex++){
+   let homeX=24+hIndex*49+(hIndex<8?18:14);
+   let familySize=Math.min(5,Math.max(1,s.people-hIndex*5));
+   for(let member=0;member<familySize;member++){
+     let phase=t*(0.65+member*.09)+hIndex*1.7+member*2.1;
+     let walking=Math.sin(phase)>.78;
+     let x=homeX+Math.sin(phase*.7+member)*((walking?25:9));
+     let y=300+member*3+(hIndex%2)*5;
+     let bob=walking?Math.abs(Math.sin(phase*3))*2:0;
+     let coat=['#e59b46','#4b91aa','#a95652','#d0bd53','#4e8a67'][((hIndex+member)%5)];
+     // shadow and little person
+     rect(x-4,y+13,10,2,'rgba(0,0,0,.35)');
+     rect(x-4,y-20+bob,9,10,'#e2b38c');
+     rect(x-6,y-10+bob,13,15,coat);
+     rect(x-5+(walking?Math.sin(phase*3)*2:0),y+5+bob,4,9,'#283342');
+     rect(x+2-(walking?Math.sin(phase*3)*2:0),y+5+bob,4,9,'#283342');
+     if(member===0&&hIndex%3===0){rect(x-7,y-22+bob,14,3,'#493a2d')}
+   }
+ }
+ // Пешеходы между домами: взрослые идут к магазину, школе и остановке.
+ for(let p=0;p<Math.min(8,Math.floor(s.people/8));p++){
+   let x=((p*139+t*(10+(p%3)*3))%(w+80))-40;
+   let y=365+(p%2)*8,bob=Math.abs(Math.sin(t*5+p))*2;
+   rect(x-4,y-19+bob,9,9,'#e2b38c');
+   rect(x-6,y-10+bob,13,15,['#e59b46','#4b91aa','#a95652','#d0bd53'][p%4]);
+   rect(x-5+Math.sin(t*5+p)*2,y+5+bob,4,9,'#283342');
+   rect(x+2-Math.sin(t*5+p)*2,y+5+bob,4,9,'#283342');
+ }
+ // Окна занятых домов светятся вечером, а над домами появляются маленькие таблички семей.
+ if(night){
+   for(let i=0;i<occupiedHouses;i++){
+     let hx=24+i*49+(i<8?18:14);
+     rect(hx+5,267,17,3,'rgba(255,220,130,.35)');
+   }
+ }
  // Семейный микроавтобус приезжает после заселения новой группы жителей.
  if(s.arrivalAt&&Date.now()-s.arrivalAt<8500){let p=(Date.now()-s.arrivalAt)/8500;let vx=-100+p*850;rect(vx,338,86,28,'#d9d8c8');rect(vx+12,327,52,14,'#8db6c5');rect(vx+17,330,14,9,'#24384a');rect(vx+36,330,14,9,'#24384a');ctx.fillStyle='#15191e';ctx.beginPath();ctx.arc(vx+18,368,9,0,7);ctx.arc(vx+69,368,9,0,7);ctx.fill();rect(vx+78,347,5,4,'#f4d56b')}
  // В начале дороги транспорт стоит: движение открывается только после ремонта, затем постепенно учащается.
