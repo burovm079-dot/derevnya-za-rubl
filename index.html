@@ -31,18 +31,19 @@
 <button class="act" id="street"><strong>🏘️ Новая улица</strong><small>Подготовить участок для заселения · 550 000 ₽</small></button>
 <button class="act" id="grant"><strong>📄 Госпрограмма</strong><small>Подать заявку на поддержку · бесплатно</small></button>
 </section>
-<div class="panel"><h3>📊 СОСТОЯНИЕ ПОСЕЛЕНИЯ</h3><p id="stats">Дома заселены: 0 / 20 · Рабочие места: 0 · Кредит: нет</p><p class="muted">Содержание деревни списывается каждый день. Зарплаты и доходы поступают по итогам месяца. Решения влияют на приезд и отъезд жителей.</p></div>
+<div class="panel"><h3>🏚️ РЕМОНТ ОТДЕЛЬНЫХ ДОМОВ</h3><p>Каждый дом ремонтируется отдельно. Стоимость одного ремонта — 250 000 ₽. После оплаты рабочие появятся у выбранного дома, а его крыша постепенно обновится.</p><div id="houseRepairs" class="cards" style="padding:6px 0"></div></div><div class="panel"><h3>📊 СОСТОЯНИЕ ПОСЕЛЕНИЯ</h3><p id="stats">Дома заселены: 0 / 20 · Рабочие места: 0 · Кредит: нет</p><p class="muted">Содержание деревни списывается каждый день. Зарплаты и доходы поступают по итогам месяца. Решения влияют на приезд и отъезд жителей.</p></div>
 <div class="bottom"><button id="next">⏩ ПРОЖИТЬ 1 ДЕНЬ</button><button class="secondary" id="save">💾 СОХРАНИТЬ</button></div><div class="log" id="log"><b>День 1.</b> Деревня куплена за 1 рубль. На доске — четыре первоочередные проблемы.</div>
 </main>
 <script>
 const $=id=>document.getElementById(id),ctx=$('village').getContext('2d');
 const fresh=()=>({day:1,money:3000000,people:1,road:false,water:false,roof:false,power:false,firstHome:false,credit:false,loan:0,loanPay:0,farm:false,shop:false,internet:false,school:false,modular:false,heating:false,forest:false,bus:false,street:false,grant:false,grantPaid:false,work:0,happiness:40,homes:20,schoolChildren:0,ended:false,events:[],eventWait:false});
-let s=fresh();let gameStarted=false;let dayTimer=null;const fmt=n=>Math.round(n).toLocaleString('ru-RU');const core=()=>['road','water','roof','power'].filter(k=>s[k]).length;const target=()=>s.people<100?100:s.people<300?300:600;
+let s=fresh();s.houseRepairs=Array(20).fill(false);s.houseRepairTimers={};let gameStarted=false;let dayTimer=null;const fmt=n=>Math.round(n).toLocaleString('ru-RU');const core=()=>['road','water','roof','power'].filter(k=>s[k]).length;const target=()=>s.people<100?100:s.people<300?300:600;
 const tasks=[['road','Дорога'],['water','Вода'],['roof','Крыши'],['power','Свет']];
 function say(t){$('log').innerHTML='<b>День '+s.day+'.</b> '+t}
 function season(){if(s.day<91)return '🌱 ВЕСНА';if(s.day<182)return '☀️ ЛЕТО';if(s.day<274)return '🍂 ОСЕНЬ';return '❄️ ЗИМА'}
-function update(){ $('days').textContent=Math.max(0,365-s.day+1);$('people').textContent=s.people+' / '+target();$('money').textContent=fmt(s.money);$('season').textContent=season()+' · ДЕНЬ '+s.day;$('taskList').innerHTML=tasks.map(([k,n])=>'<div class="check '+(s[k]?'done':'')+'"><span>'+n+'</span><em>'+(s[k]?'✓ ГОТОВО':'НЕ СДЕЛАНО')+'</em></div>').join('');$('progress').style.width=(core()/4*100)+'%';$('stats').textContent='Пустых домов: '+Math.max(0,20-Math.ceil(s.people/5))+' / 20 · Рабочие места: '+s.work+' · Кредит: '+(s.loan?fmt(s.loan)+' ₽':'нет')+' · Настроение: '+s.happiness+'%';
+function update(){if(!Array.isArray(s.houseRepairs))s.houseRepairs=Array(20).fill(false);if(!s.houseRepairTimers)s.houseRepairTimers={};$('houseRepairs').innerHTML=s.houseRepairs.map((done,i)=>'<button class="act" '+(done?'disabled':'')+' onclick="repairHouse('+i+')"><strong>🏠 Дом №'+(i+1)+'</strong><small>'+(done?'✓ Отремонтирован':'Ремонт дома · 250 000 ₽')+'</small></button>').join('');$('days').textContent=Math.max(0,365-s.day+1);$('people').textContent=s.people+' / '+target();$('money').textContent=fmt(s.money);$('season').textContent=season()+' · ДЕНЬ '+s.day;$('taskList').innerHTML=tasks.map(([k,n])=>'<div class="check '+(s[k]?'done':'')+'"><span>'+n+'</span><em>'+(s[k]?'✓ ГОТОВО':'НЕ СДЕЛАНО')+'</em></div>').join('');$('progress').style.width=(core()/4*100)+'%';$('stats').textContent='Пустых домов: '+Math.max(0,20-Math.ceil(s.people/5))+' / 20 · Рабочие места: '+s.work+' · Кредит: '+(s.loan?fmt(s.loan)+' ₽':'нет')+' · Настроение: '+s.happiness+'%';
  const keys=['road','water','roof','power','firstHome','credit','farm','shop','internet','school','modular','heating','forest','bus','street','grant'];keys.forEach(k=>{$(k).disabled=s[k]||s.ended});$('next').disabled=s.ended;draw()}
+window.repairHouse=function(i){if(!gameStarted){say('Сначала нажми «НАЧАТЬ ИГРУ».');return}if(s.houseRepairs[i]||s.ended)return;if(!pay(250000))return;s.houseRepairs[i]=true;s.houseRepairTimers[i]=Date.now();s.happiness=Math.min(100,s.happiness+1);say('Начат ремонт дома №'+(i+1)+'. Рабочие установили леса, снимают старую крышу и укладывают новую.');update()};
 function pay(cost){if(s.money<cost){say('Не хватает денег. Необходимо '+fmt(cost)+' ₽. Подумай о кредите или госпрограмме.');return false}s.money-=cost;return true}
 function act(k,cost,fn){if(s.ended||s[k])return;if(!pay(cost))return;s[k]=true;fn();update()}
 $('road').onclick=()=>act('road',450000,()=>{s.happiness+=5;say('Дорогу восстановили. Самосвалы снова могут привозить стройматериалы.')});
@@ -105,7 +106,7 @@ function draw(){
  rect(0,315,w,95,'#28211f');rect(0,306,w,9,'#62705b');rect(0,321,w,3,'#9a8972');
  if(s.road){rect(0,300,w,8,'#81898a');for(let x=0;x<w;x+=75)rect(x,303,35,2,'#f0e3bd')}
  // village houses laid out along one street
- let houses=[70,190,310,430,550,670,790,910];let repaired=Math.min(8,Math.floor((Date.now()-(s.roofAt||0))/700));houses.forEach((x,i)=>drawHouse(x,240,0.88,'home',s.roof&&i<repaired));
+ let houses=Array.from({length:20},(_,i)=>24+i*49);houses.forEach((x,i)=>{let started=s.houseRepairTimers&&s.houseRepairTimers[i];let progress=started?Math.min(1,(Date.now()-started)/4500):0;drawHouse(x,250,i<8?0.57:0.43,'home',!!(s.houseRepairs&&s.houseRepairs[i]&&progress>=1));if(started&&progress<1){rect(x+12,225,28,30,'#b68a4f');rect(x+10,220,32,3,'#e5c27c');rect(x+23,211,3,15,'#e5c27c');rect(x+8,235,4,14,'#d8b16e');rect(x+40,235,4,14,'#d8b16e');}});
  // new buildings appear on the actual village strip when bought
  if(s.farm){
    drawHouse(755,178,1.42,'farm');
@@ -140,5 +141,5 @@ $('start').addEventListener('click',()=>{$('intro').style.display='none';$('intr
 $('restart').onclick=()=>{if(dayTimer)clearInterval(dayTimer);gameStarted=false;s=fresh();$('ending').classList.add('hidden');$('event').classList.add('hidden');$('intro').classList.remove('hidden');update();say('Новая попытка. Планируй бюджет и не забывай о зиме.')};
 $('save').onclick=()=>{localStorage.setItem('villageSaveVideo',JSON.stringify({...s,gameStarted}));say('Игра сохранена на этом устройстве.')};
 animateScene();
-try{let old=JSON.parse(localStorage.getItem('villageSaveVideo'));if(old){s={...fresh(),...old};gameStarted=!!old.gameStarted&&!s.ended;if(gameStarted)$('intro').classList.add('hidden');if(s.ended)$('ending').classList.remove('hidden');if(gameStarted)startAutoDays()}}catch(e){}update();
+try{let old=JSON.parse(localStorage.getItem('villageSaveVideo'));if(old){s={...fresh(),...old};if(!Array.isArray(s.houseRepairs))s.houseRepairs=Array(20).fill(false);if(!s.houseRepairTimers)s.houseRepairTimers={};gameStarted=!!old.gameStarted&&!s.ended;if(gameStarted)$('intro').classList.add('hidden');if(s.ended)$('ending').classList.remove('hidden');if(gameStarted)startAutoDays()}}catch(e){}update();
 </script></body></html>
