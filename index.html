@@ -151,7 +151,21 @@ function draw(){
  if(s.shop){drawHouse(610,224,.95,'shop');rect(620,249,68,3,'#f4d89a');rect(606,280,92,25,'#3e4c52');ctx.fillStyle='#f4e1b2';ctx.font='bold 10px Arial';ctx.fillText('МАГАЗИН · '+s.storeStock,612,296);for(let j=0;j<Math.min(5,Math.floor(s.storeStock/20));j++){rect(615+j*14,269,8,7,'#d9a45b');rect(617+j*14,265,4,5,'#f1d28b')}for(let q=0;q<3&&s.people>4;q++){let px=600+((t*17+q*37)%105);rect(px,316,5,8,'#e6b994');rect(px-1,324,7,9,['#c45a4d','#4b91aa','#d1a34c'][q]);}}
  if(s.school){drawHouse(490,210,1.15,'school');if(s.schoolChildren){for(let c=0;c<Math.min(8,s.schoolChildren);c++){let cx=510+c*15+Math.sin(t*1.5+c)*3,cy=290+Math.sin(t*5+c)*2;rect(cx,cy,6,9,'#e4b18a');rect(cx-1,cy+9,8,10,'#4c8ead');rect(cx-2,cy+10,3,5,'#d6a24e');rect(cx+5,cy+10,3,5,'#d6a24e')}}if(s.bus){let bx=((t*28)%1180)-100;rect(bx,325,72,25,'#e6b83e');for(let j=0;j<4;j++)rect(bx+6+j*16,329,12,10,'#91c4d3');ctx.fillStyle='#171b20';ctx.beginPath();ctx.arc(bx+15,350,7,0,7);ctx.arc(bx+59,350,7,0,7);ctx.fill()}}
  if(s.modular){for(let i=0;i<4;i++){let x=55+i*112;rect(x,235,88,67,'#d8e0df');rect(x-4,227,96,10,'#8799a4');rect(x+10,250,18,18,'#9bc4d0');rect(x+58,250,18,18,'#9bc4d0')}}
- if(s.forest){rect(865,205,105,83,'#71523a');rect(857,196,121,12,'#586d4e');for(let i=0;i<4;i++)rect(875+i*20,245,13,35,'#b68b57')}
+ if(s.forest){
+   // Лесопилка, штабеля брёвен и грузовик лесной компании.
+   rect(865,205,105,83,'#71523a');rect(857,196,121,12,'#586d4e');rect(875,245,95,43,'#755238');
+   for(let i=0;i<5;i++){let x=870+(i%3)*31,y=249+Math.floor(i/3)*18;rect(x,y,28,7,'#b68b57');rect(x+2,y+1,4,5,'#e0bd83')}
+   let lx=((t*20)%1200)-120;rect(lx,324,82,22,'#426b4b');rect(lx+12,314,34,13,'#8bb5c0');rect(lx+49,319,24,10,'#b68b57');for(let k=0;k<3;k++)rect(lx+48+k*8,316,6,4,'#e0bd83');ctx.fillStyle='#171b20';ctx.beginPath();ctx.arc(lx+17,348,8,0,7);ctx.arc(lx+67,348,8,0,7);ctx.fill();
+ }
+ if(s.credit){
+   // Районное отделение банка — появляется после оформления программы дома за рубль.
+   drawHouse(360,216,1.05,'shop',true,true);rect(364,240,67,10,'#e7e5d8');ctx.fillStyle='#263747';ctx.font='bold 9px Arial';ctx.fillText('БАНК',383,248);rect(391,261,13,25,'#d5c7a0');rect(384,257,27,5,'#e2d7bc');
+ }
+ if(s.internet){
+   // Радиомачта и расходящиеся волны связи.
+   rect(950,125,4,126,'#b7c0c2');rect(934,150,36,3,'#b7c0c2');rect(941,137,22,3,'#b7c0c2');
+   ctx.strokeStyle='rgba(123,205,231,.75)';ctx.lineWidth=2;for(let k=1;k<=3;k++){ctx.beginPath();ctx.arc(952,130,k*10,-2.5,-.65);ctx.stroke()}
+ }
  // Жители привязаны к своим домам: возле каждого заселённого дома видна семья.
  // Часть людей спокойно стоит у калитки, часть выходит на улицу и идёт по делам.
  let occupiedHouses=s.people===1?0:Math.min(10,Math.ceil(s.people/5));
