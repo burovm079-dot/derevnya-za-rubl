@@ -297,8 +297,8 @@ function draw(){
  ctx.restore();
 }
 function animateScene(){animFrame++;draw();requestAnimationFrame(animateScene)}
-function startAutoDays(){if(dayTimer)clearInterval(dayTimer);dayTimer=setInterval(()=>{if(gameStarted&&!s.ended&&$('event').classList.contains('hidden'))day()},10000)}
-$('start').addEventListener('click',()=>{$('intro').style.display='none';$('intro').classList.add('hidden');gameStarted=true;say('Игра началась! Время идёт автоматически: каждые 10 секунд проходит один игровой день. Начинай с четырёх проблем на доске.');update();startAutoDays()});
+function startAutoDays(){if(dayTimer)clearInterval(dayTimer);dayTimer=setInterval(()=>{if(gameStarted&&!s.ended&&$('event').classList.contains('hidden'))day()},60000)}
+$('start').addEventListener('click',()=>{$('intro').style.display='none';$('intro').classList.add('hidden');gameStarted=true;say('Игра началась! Время идёт автоматически: одна минута реального времени равна одному игровому дню. Начинай с четырёх проблем на доске.');update();startAutoDays()});
 $('restart').onclick=()=>{if(dayTimer)clearInterval(dayTimer);gameStarted=false;s=fresh();s.houseRepairs=Array(20).fill(false);s.houseRepairTimers={};localStorage.setItem('villageSaveVideo_v2',JSON.stringify({...s,gameStarted:false}));$('ending').classList.add('hidden');$('event').classList.add('hidden');$('intro').classList.remove('hidden');update();say('Новая попытка. Планируй бюджет и не забывай о зиме.')};
 $('save').onclick=()=>{localStorage.setItem('villageSaveVideo_v2',JSON.stringify({...s,gameStarted}));say('Игра сохранена на этом устройстве.')};
 animateScene();
