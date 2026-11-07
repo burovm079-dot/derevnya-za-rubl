@@ -147,7 +147,7 @@ function draw(){
 
  }
  if(s.shop){drawHouse(1600,224,.95,'shop');rect(1608,249,68,3,'#f4d89a');rect(1594,280,92,25,'#3e4c52');ctx.fillStyle='#f4e1b2';ctx.font='bold 10px Arial';ctx.fillText('МАГАЗИН · '+s.storeStock,1600,296);for(let j=0;j<Math.min(5,Math.floor(s.storeStock/20));j++){rect(1603+j*14,269,8,7,'#d9a45b');rect(1605+j*14,265,4,5,'#f1d28b')}for(let j=0;j<4;j++){rect(1610+j*15,257,10,7,'#b97835');rect(1612+j*15,255,6,3,'#e8c17a');}for(let q=0;q<3&&s.people>4;q++){let px=1590+((t*17+q*37)%105);rect(px,316,5,8,'#e6b994');rect(px-1,324,7,9,['#c45a4d','#4b91aa','#d1a34c'][q]);}}
- if(s.school){drawHouse(1740,210,1.15,'school');if(s.schoolChildren){for(let c=0;c<Math.min(8,s.schoolChildren);c++){let cx=1730+c*15+Math.sin(t*1.5+c)*3,cy=290+Math.sin(t*5+c)*2;rect(cx,cy,6,9,'#e4b18a');rect(cx-1,cy+9,8,10,'#4c8ead');rect(cx-2,cy+10,3,5,'#d6a24e');rect(cx+5,cy+10,3,5,'#d6a24e')}}if(s.bus){let bx=1740+((t*28)%300);rect(bx,325,72,25,'#e6b83e');for(let j=0;j<4;j++)rect(bx+6+j*16,329,12,10,'#91c4d3');ctx.fillStyle='#171b20';ctx.beginPath();ctx.arc(bx+15,350,7,0,7);ctx.arc(bx+59,350,7,0,7);ctx.fill();rect(1715,318,44,5,'#d5c49a');rect(1718,284,4,34,'#7c6b51');rect(1753,284,4,34,'#7c6b51');rect(1716,282,43,4,'#b7c2c3');rect(1736,265,3,17,'#b9bfc0');rect(1729,266,17,9,'#e6bd49');ctx.fillStyle='#263747';ctx.font='bold 8px Arial';ctx.fillText('ШКОЛА',bx+18,322)}}
+ if(s.school){drawHouse(1740,210,1.15,'school');if(winter){rect(1733,199,100,5,'#f4f6f4');rect(1740,188,85,4,'#f4f6f4')}if(s.schoolChildren){for(let c=0;c<Math.min(8,s.schoolChildren);c++){let cx=1730+c*15+Math.sin(t*1.5+c)*3,cy=290+Math.sin(t*5+c)*2;rect(cx,cy,6,9,'#e4b18a');rect(cx-1,cy+9,8,10,['#4c8ead','#c45c4e','#d6a24e'][c%3]);rect(cx-2,cy+10,3,5,'#d6a24e');rect(cx+5,cy+10,3,5,'#d6a24e')}}if(s.bus){let phase=(t*24)%900,bx=phase<430?1320+phase:phase<520?1750:1750-(phase-520);rect(bx,325,72,25,'#e6b83e');rect(bx+10,311,42,15,'#e6b83e');for(let j=0;j<4;j++)rect(bx+6+j*16,329,12,10,'#91c4d3');ctx.fillStyle='#171b20';ctx.beginPath();ctx.arc(bx+15,350,7,0,7);ctx.arc(bx+59,350,7,0,7);ctx.fill();rect(1715,318,44,5,'#d5c49a');rect(1718,284,4,34,'#7c6b51');rect(1753,284,4,34,'#7c6b51');rect(1716,282,43,4,'#b7c2c3');rect(1736,265,3,17,'#b9bfc0');rect(1729,266,17,9,'#e6bd49');ctx.fillStyle='#263747';ctx.font='bold 8px Arial';ctx.fillText('ШКОЛА',bx+18,322)}}
  if(s.modular){let build=s.modularAt?Math.min(1,(Date.now()-s.modularAt)/22000):1;if(build<1){let cx=1420+Math.sin(t*1.4)*8;rect(cx,150,8,145,'#d7b45d');rect(cx-38,151,92,6,'#d7b45d');rect(cx+42,151,3,78,'#d7b45d');let loadY=190+Math.sin(t*2)*4;rect(cx+34,loadY,28,22,'#d8e0df');rect(cx+36,loadY+4,24,3,'#8da1ac');let truckX=1320+Math.sin(t*.7)*14;rect(truckX,310,105,22,'#426d8b');rect(truckX+12,296,35,16,'#86b5c5');ctx.fillStyle='#171b20';ctx.beginPath();ctx.arc(truckX+20,334,8,0,7);ctx.arc(truckX+85,334,8,0,7);ctx.fill()}for(let i=0;i<4;i++){let x=1370+i*112,done=build>(i+1)/4;ctx.globalAlpha=done?1:Math.max(.18,build*2.5-i*.55);rect(x,235,88,67,'#d8e0df');rect(x-4,227,96,10,'#8799a4');rect(x+10,250,18,18,'#9bc4d0');rect(x+58,250,18,18,'#9bc4d0');ctx.globalAlpha=1;if(!done){rect(x-7,220,3,85,'#c79b5a');rect(x+91,220,3,85,'#c79b5a');rect(x-9,221,105,3,'#e4c17d')}}}
  if(s.street){let bp=s.streetAt?Math.min(1,(Date.now()-s.streetAt)/20000):1;rect(980,344,820*bp,5,'#747b7c');for(let i=0;i<Math.floor(bp*6);i++){let x=1000+i*95;rect(x,315,4,34,'#66523d');rect(x-8,315,20,3,'#b5a18a')}if(bp<1){let sx=980+bp*760;rect(sx,302,68,20,'#d49b37');rect(sx+9,289,34,15,'#b8c5c6');ctx.fillStyle='#171b20';ctx.beginPath();ctx.arc(sx+14,325,8,0,7);ctx.arc(sx+55,325,8,0,7);ctx.fill()}for(let i=0;i<Math.floor(bp*4);i++){let x=1010+i*180;rect(x,244,65,53,'#b6c4c5');rect(x-3,237,71,8,'#7e8d94');rect(x+9,255,13,15,'#89b9c9')}}
  if(s.forest){
@@ -173,10 +173,14 @@ function draw(){
      for(let i=0;i<5;i++){let x=1670+(i%3)*31,y=249+Math.floor(i/3)*18;rect(x,y,28,7,'#b68b57');rect(x+2,y+1,4,5,'#e0bd83')}
      rect(1646,273+workerBob,9,18,'#c78d4c');rect(1644,265+workerBob,13,10,'#e1b58c');rect(1641,263+workerBob,17,4,'#4a3b30');rect(1647,291+workerBob,3,10,'#293343');rect(1653,291+workerBob,3,10,'#293343');
      ctx.strokeStyle='#d8d8ce';ctx.lineWidth=2;ctx.beginPath();ctx.arc(1670,277+workerBob,7+Math.sin(t*8)*2,0,7);ctx.stroke();
+     if(Math.sin(t*8)>.72){for(let z=0;z<4;z++){let sx=1678+Math.random()*13,sy=270+Math.random()*12;rect(sx,sy,3,2,'#f2d47c')}}
+     // Дым из трубы работающей лесопилки.
+     for(let q=0;q<4;q++){let smoke=(t*9+q*11)%38;ctx.globalAlpha=.25*(1-smoke/42);ctx.fillStyle='#d5d9d7';ctx.beginPath();ctx.arc(1750+Math.sin(t+q)*4,190-smoke,4+smoke*.08,0,7);ctx.fill();ctx.globalAlpha=1}
      let lx=1640+((t*20)%220);rect(lx,324,82,22,'#426b4b');rect(lx+12,314,34,13,'#8bb5c0');rect(lx+49,319,24,10,'#b68b57');for(let k=0;k<3;k++)rect(lx+48+k*8,316,6,4,'#e0bd83');ctx.fillStyle='#171b20';ctx.beginPath();ctx.arc(lx+17,348,8,0,7);ctx.arc(lx+67,348,8,0,7);ctx.fill();
    }
  }
 
+ if(s.forest&&winter){rect(1658,191,120,4,'#eef2f0');rect(1667,201,101,3,'#e3e9e9')}
  if(s.internet){
    // Радиомачта и расходящиеся волны связи.
    rect(2340,125,4,126,'#b7c0c2');rect(2324,150,36,3,'#b7c0c2');rect(2331,137,22,3,'#b7c0c2');ctx.strokeStyle='rgba(123,205,231,.75)';ctx.lineWidth=2;for(let k=1;k<=3;k++){ctx.beginPath();ctx.arc(2342,130,k*10,-2.5,-.65);ctx.stroke()}
@@ -247,7 +251,14 @@ function draw(){
  // В начале дороги транспорт стоит: движение открывается только после ремонта, затем постепенно учащается.
  let trafficRoadProgress=s.road&&s.roadAt?Math.min(1,(Date.now()-s.roadAt)/18000):0;if(s.road&&trafficRoadProgress>=1){let traffic=Math.min(4,1+Math.floor(Math.max(0,s.day-1)/35));for(let v=0;v<traffic;v++){let car=((t*(24+v*8)+v*263)%(roadLength-74+1));let cy=321;rect(car,cy,74,20,['#32658b','#a84b42','#d1a23e','#557b58'][v]);rect(car+15,cy-10,39,13,'#7eb3c8');ctx.fillStyle='#15191e';ctx.beginPath();ctx.arc(car+15,cy+21,7,0,7);ctx.arc(car+60,cy+21,7,0,7);ctx.fill()}}else if(s.road){let truckX=((t*17)%1180)-100;rect(truckX,324,64,25,'#b88b42');rect(truckX+8,314,28,13,'#d8c18a');ctx.fillStyle='#171b20';ctx.beginPath();ctx.arc(truckX+13,350,8,0,7);ctx.arc(truckX+52,350,8,0,7);ctx.fill()}
  // winter snow / autumn leaves
- if(winter){for(let i=0;i<110;i++){let x=(i*137+t*(8+i%4)*2)%w,y=(i*71+t*(20+i%5)*3)%315;rect(x,y,2,3,'rgba(255,255,255,.8)')}}
+ if(winter){
+   // Снег постепенно ложится на крыши, обочины и площадки у домов.
+   rect(0,348,w,8,'#dce6e8');rect(0,359,w,3,'#aabcc5');
+   for(let i=0;i<(s.street?6:10);i++){let x=(s.street?1010:18)+i*(s.street?84:98);rect(x-4,231,86,4,'#eef2ef');rect(x+4,238,70,3,'#dce7e9')}
+   if(s.school){rect(1734,199,100,5,'#f1f4f2');rect(1740,188,85,4,'#e6edef')}
+   if(s.farm){rect(1872,165,122,5,'#edf2f1');rect(1880,173,112,3,'#e2e9e9')}
+   for(let i=0;i<110;i++){let x=(i*137+t*(8+i%4)*2)%w,y=(i*71+t*(20+i%5)*3)%315;rect(x,y,2,3,'rgba(255,255,255,.8)')}
+ }
  if(autumn){for(let i=0;i<28;i++){let x=(i*91+t*17)%w,y=(i*43+t*21)%300;rect(x,y,3,5,'#bd783d')}}
  // Электричество загорается по улице постепенно после монтажа линии.
  if(s.power){let p=s.powerAt?Math.min(1,(Date.now()-s.powerAt)/14000):1;for(let i=0;i<10;i++){let x=18+i*98+27;if(i/10<=p){ctx.fillStyle=(night&&Math.sin(animFrame/18+i)>-.4)?'#ffe6a0':'#9ab2b9';ctx.beginPath();ctx.arc(x+43,116,3,0,7);ctx.fill();if(night){ctx.shadowBlur=10;ctx.shadowColor='#ffe7a0';ctx.fill();ctx.shadowBlur=0}}}}
