@@ -11,7 +11,7 @@
 </style></head><body><main class="game">
 <header><div class="stat"><small>ОСТАЛОСЬ ДНЕЙ</small><b id="days">365</b></div><div class="stat"><small>ЖИТЕЛИ</small><b id="people">1 / 100</b></div><div class="stat money"><small>БЮДЖЕТ, ₽</small><b id="money">3 000 000</b></div></header>
 <div class="brand"><h1>ДЕРЕВНЯ <span>ЗА 1 РУБЛЬ</span></h1></div>
-<section class="scene"><canvas id="village" width="1000" height="410"></canvas><div class="season" id="season">🌙 ВЕСНА · ДЕНЬ 1</div><div class="overlay" id="intro"><div class="dialog"><h2>Ты купил деревню за 1 рубль</h2><p>20 пустых домов, один житель и 3 000 000 ₽. У тебя один год. Сначала выясни, что нужно деревне: дорога, вода, крыши и свет. Потом придётся вернуть людей, запустить работу и пережить зиму.</p><button id="start" type="button" onclick="document.getElementById('intro').style.display='none';document.getElementById('intro').classList.add('hidden');document.getElementById('log').innerHTML='ИГРА НАЧАЛАСЬ. Выполняй задачи деревни.';">НАЧАТЬ ИГРУ</button></div></div><div class="overlay hidden" id="event"><div class="dialog"><h2 id="eventTitle">Событие</h2><p id="eventText"></p><div class="choices" id="choices"></div></div></div><div class="overlay hidden" id="ending"><div class="dialog"><h2 id="endingTitle"></h2><p id="endingText"></p><button id="restart">ЗАНОВО</button></div></div></section>
+<section class="scene"><canvas id="village" width="1000" height="410"></canvas><div class="season" id="season">🌙 ВЕСНА · ДЕНЬ 1</div><div class="overlay" id="intro"><div class="dialog"><h2>Ты купил деревню за 1 рубль</h2><p>20 пустых домов, один житель и 3 000 000 ₽. У тебя один год. Сначала выясни, что нужно деревне: дорога, вода, крыши и свет. Потом придётся вернуть людей, запустить работу и пережить зиму.</p><button id="start" type="button"  >НАЧАТЬ ИГРУ</button></div></div><div class="overlay hidden" id="event"><div class="dialog"><h2 id="eventTitle">Событие</h2><p id="eventText"></p><div class="choices" id="choices"></div></div></div><div class="overlay hidden" id="ending"><div class="dialog"><h2 id="endingTitle"></h2><p id="endingText"></p><button id="restart">ЗАНОВО</button></div></div></section>
 <div class="objective"><h3 id="taskTitle">📋 ЧТО НУЖНО ДЕРЕВНЕ</h3><div id="taskList"></div><div class="bar"><i id="progress"></i></div></div>
 <div class="section">🔨 РЕМОНТ И КОММУНИКАЦИИ</div><section class="cards">
 <button class="act" id="road"><strong>🛣️ 1. Дорога</strong><small>Восстановить подъезд к деревне · 450 000 ₽</small></button>
@@ -37,7 +37,7 @@
 <script>
 const $=id=>document.getElementById(id),ctx=$('village').getContext('2d');
 const fresh=()=>({day:1,money:3000000,people:1,road:false,water:false,roof:false,power:false,firstHome:false,credit:false,loan:0,loanPay:0,farm:false,shop:false,internet:false,school:false,modular:false,heating:false,forest:false,bus:false,street:false,grant:false,grantPaid:false,work:0,happiness:40,homes:20,schoolChildren:0,ended:false,events:[],eventWait:false});
-let s=fresh();const fmt=n=>Math.round(n).toLocaleString('ru-RU');const core=()=>['road','water','roof','power'].filter(k=>s[k]).length;const target=()=>s.people<100?100:s.people<300?300:600;
+let s=fresh();let gameStarted=false;let dayTimer=null;const fmt=n=>Math.round(n).toLocaleString('ru-RU');const core=()=>['road','water','roof','power'].filter(k=>s[k]).length;const target=()=>s.people<100?100:s.people<300?300:600;
 const tasks=[['road','Дорога'],['water','Вода'],['roof','Крыши'],['power','Свет']];
 function say(t){$('log').innerHTML='<b>День '+s.day+'.</b> '+t}
 function season(){if(s.day<91)return '🌱 ВЕСНА';if(s.day<182)return '☀️ ЛЕТО';if(s.day<274)return '🍂 ОСЕНЬ';return '❄️ ЗИМА'}
@@ -47,7 +47,7 @@ function pay(cost){if(s.money<cost){say('Не хватает денег. Нео�
 function act(k,cost,fn){if(s.ended||s[k])return;if(!pay(cost))return;s[k]=true;fn();update()}
 $('road').onclick=()=>act('road',450000,()=>{s.happiness+=5;say('Дорогу восстановили. Самосвалы снова могут привозить стройматериалы.')});
 $('water').onclick=()=>act('water',350000,()=>{s.happiness+=7;say('Колодец и водоснабжение восстановлены. Вода снова поступает в дома.')});
-$('roof').onclick=()=>act('roof',600000,()=>{s.happiness+=5;say('Протекающие крыши отремонтированы. Дома готовы принимать семьи.')});
+$('roof').onclick=()=>act('roof',600000,()=>{s.roofAt=Date.now();s.happiness+=5;say('Начался ремонт крыш! Рабочие устанавливают леса и по очереди перекрывают каждый дом. Через несколько секунд все крыши будут восстановлены.')});
 $('power').onclick=()=>act('power',650000,()=>{s.happiness+=8;say('Установлены столбы, провода и трансформатор. В деревне появился свет.')});
 $('firstHome').onclick=()=>{if(core()<4){say('Сначала выполни четыре пункта на доске: дорога, вода, крыши и свет.');return}act('firstHome',250000,()=>{s.homes=20;say('Первый дом подготовлен для первой семьи. Остальные пустые дома тоже ждут ремонта.')})};
 $('credit').onclick=()=>{if(s.credit)return;showEvent('Предложение банка','Банк предлагает два варианта. Кредит даст деньги сейчас, но придётся платить каждый месяц. Второй вариант — дом за 1 рубль, но его придётся ремонтировать самостоятельно.',[['Взять кредит 1 000 000 ₽',()=>{s.credit=true;s.loan=1000000;s.loanPay=90000;s.money+=1000000;say('Банк выдал 1 000 000 ₽. Ежемесячный платёж — 90 000 ₽.');update()}],['Купить дом за 1 ₽',()=>{s.credit=true;s.money-=1;say('Дом приобретён за 1 рубль. Он требует ремонта, но теперь есть дополнительное жильё.');update()}],['Отказаться',()=>say('Ты решил пока не связываться с банком.')]])};
@@ -60,10 +60,10 @@ $('heating').onclick=()=>act('heating',320000,()=>{s.happiness+=8;say('В дом
 $('forest').onclick=()=>act('forest',700000,()=>{s.work+=12;say('Лесная компания начала работу. Появились рабочие места и стабильные зарплаты.')});
 $('bus').onclick=()=>act('bus',240000,()=>{s.happiness+=5;say('Школьный автобус вышел на маршрут.')});
 $('street').onclick=()=>act('street',550000,()=>{s.homes+=40;say('В деревне появилась новая улица. Открыта возможность расширить поселение до нескольких сотен жителей.')});
-$('grant').onclick=()=>{if(s.grant)return;showEvent('Государственная программа','Можно подать заявку на грант до 5 000 000 ₽. Для одобрения нужны действующее хозяйство и люди, которые будут работать.',[['Подать заявку',()=>{s.grant=true;if(s.farm&&s.work>=8){s.money+=5000000;s.grantPaid=true;s.loanPay+=900000;say('Грант одобрен: регион выделил 5 000 000 ₽. По условиям программы нужно вернуть 900 000 ₽.');}else{say('Заявка отправлена. Пока не хватает работающего хозяйства и сотрудников. Вернись к этому позже.')}update()}],['Пока не подавать',()=>say('Ты решил сначала подготовить хозяйство.')]])};
+$('grant').onclick=()=>{if(s.grant)return;if(!(s.farm&&s.work>=8)){say('Для гранта сначала нужна действующая ферма и минимум 8 рабочих мест. Заявку можно будет подать позже.');return}showEvent('Государственная программа','Можно подать заявку на грант до 5 000 000 ₽. Для одобрения нужны действующее хозяйство и люди, которые будут работать.',[['Подать заявку',()=>{s.grant=true;s.money+=5000000;s.grantPaid=true;s.loanPay+=900000;say('Грант одобрен: регион выделил 5 000 000 ₽. По условиям программы нужно вернуть 900 000 ₽.');update()}],['Пока не подавать',()=>say('Ты решил сначала подготовить хозяйство.')]])};
 function showEvent(title,txt,opts){$('eventTitle').textContent=title;$('eventText').textContent=txt;$('choices').innerHTML='';opts.forEach(([label,fn])=>{let b=document.createElement('button');b.textContent=label;b.onclick=()=>{$('event').classList.add('hidden');fn()};$('choices').appendChild(b)});$('event').classList.remove('hidden')}
 function randomEvent(){let pool=[];if(!s.farm)pool.push(['Коровы и трактор','Местный фермер предлагает продать хозяйство. Без фермы деревня теряет шанс на постоянную работу.',[['Записать в план',()=>say('Ты отметил ферму как приоритетную задачу.')],['Отложить',()=>say('Предложение фермера пока отложено.')]]]);if(!s.heating)pool.push(['Скоро морозы','Синоптики предупреждают о морозах до −20°. Без отопления жители могут уехать.',[['Начать подготовку',()=>{say('Отопление остаётся важнейшей задачей перед зимой.')}],['Рискнуть',()=>{s.happiness-=5;say('Ты решил рискнуть. Настроение жителей упало.')}]]]);if(!s.school)pool.push(['Нужны учителя','В районной программе обещают поддержку школе, но сначала нужно подготовить здание и найти учителей.',[['Заняться школой',()=>say('Школа добавлена в список приоритетов.')],['Позже',()=>say('Школьный вопрос отложен.')]]]);pool.push(['Семья хочет переехать','Ещё одна семья интересуется домом в деревне.',[['Принять семью',()=>{if(s.homes*5>s.people){s.people++;s.happiness+=2;say('Семья переехала. Теперь жителей '+s.people+'.')}else say('Свободного жилья нет. Сначала подготовь дома.')}],['Отказаться',()=>say('Семья выбрала другое место.')]]]);let e=pool[Math.floor(Math.random()*pool.length)];showEvent(e[0],e[1],e[2])}
-function day(){if(s.ended||s.eventWait)return;s.day++;let daily=800+s.people*90+(s.farm?1700:0)+(s.shop?700:0)+(s.school?1100:0)+(s.forest?2200:0)+(s.heating&&s.day>=274?1200:0);s.money-=daily;if(s.loan)s.money-=s.loanPay;
+function day(){if(!gameStarted||s.ended||s.eventWait||!$('event').classList.contains('hidden'))return;s.day++;let daily=800+s.people*90+(s.farm?1700:0)+(s.shop?700:0)+(s.school?1100:0)+(s.forest?2200:0)+(s.heating&&s.day>=274?1200:0);s.money-=daily;if(s.loan)s.money-=s.loanPay;
  if(s.day%7===0){let quality=(s.road?1:0)+(s.water?1:0)+(s.roof?1:0)+(s.power?1:0)+(s.shop?1:0)+(s.farm?1:0)+(s.school?1:0)+(s.heating?1:0);let capacity=Math.max(0,s.homes*5-s.people);let newcomers=Math.min(capacity,quality>=7?12:quality>=5?8:quality>=3?4:0);if(newcomers>0){s.people+=newcomers;s.happiness=Math.min(100,s.happiness+1);say('За неделю приехали '+newcomers+' новых жителя.')}}
  if(s.day%30===0){let income=s.people*900+s.work*4500+(s.farm?100000:0)+(s.shop?70000:0)+(s.forest?35000:0);s.money+=income;say('Конец месяца: зарплаты и налоги принесли '+fmt(income)+' ₽. Содержание за день — '+fmt(daily)+' ₽.');if(s.day>30&&Math.random()<.55)randomEvent()}
  if(s.day===180&&!s.heating){s.happiness-=12;showEvent('Первые заморозки','Ночью температура резко упала. В домах без батарей холодно. Жители требуют отопление.',[['Постараться установить батареи',()=>say('Нужно как можно скорее установить отопление.')],['Ничего не делать',()=>{s.happiness-=8;say('Люди недовольны. Некоторые семьи могут уехать.')} ]])}
@@ -73,13 +73,13 @@ function day(){if(s.ended||s.eventWait)return;s.day++;let daily=800+s.people*90+
 function end(win,txt){s.ended=true;$('endingTitle').textContent=win?'ДЕРЕВНЯ СПАСЕНА!':'ДЕРЕВНЯ НЕ СПАСЕНА';$('endingText').textContent=txt+' Бюджет: '+fmt(s.money)+' ₽.';$('ending').classList.remove('hidden');update()}
 let animFrame=0;
 function rect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))}
-function drawHouse(x,y,scale=1,kind='home'){
+function drawHouse(x,y,scale=1,kind='home',roofFixed=false){
  ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
  let wall=kind==='school'?'#d9e4dc':kind==='shop'?'#b9a17a':'#8d6848';
  rect(0,24,86,53,'#493b34');rect(4,20,78,54,wall);
  // corrugated roof
- rect(-5,17,96,9,kind==='farm'?'#347b54':s.roof?'#87949e':'#59616a');
- ctx.beginPath();ctx.moveTo(-5,18);ctx.lineTo(43,-9);ctx.lineTo(91,18);ctx.closePath();ctx.fillStyle=kind==='farm'?'#347b54':s.roof?'#87949e':'#59616a';ctx.fill();
+ rect(-5,17,96,9,kind==='farm'?'#347b54':roofFixed?'#87949e':'#59616a');
+ ctx.beginPath();ctx.moveTo(-5,18);ctx.lineTo(43,-9);ctx.lineTo(91,18);ctx.closePath();ctx.fillStyle=kind==='farm'?'#347b54':roofFixed?'#87949e':'#59616a';ctx.fill();
  for(let xx=2;xx<88;xx+=7)rect(xx,13,2,7,'rgba(20,30,40,.3)');
  for(let j=0;j<2;j++){rect(12+j*43,39,20,18,s.power&&Math.sin(animFrame/20+j)>-.7?'#ffd77b':'#263b4d');rect(21+j*43,39,2,18,'#5c5145');rect(12+j*43,47,20,2,'#5c5145')}
  rect(39,50,15,27,'#493126');rect(43,56,2,2,'#d8c28e');
@@ -105,7 +105,7 @@ function draw(){
  rect(0,315,w,95,'#28211f');rect(0,306,w,9,'#62705b');rect(0,321,w,3,'#9a8972');
  if(s.road){rect(0,300,w,8,'#81898a');for(let x=0;x<w;x+=75)rect(x,303,35,2,'#f0e3bd')}
  // village houses laid out along one street
- let houses=[70,190,310,430,550,670,790,910];houses.forEach((x,i)=>drawHouse(x,240,0.88));
+ let houses=[70,190,310,430,550,670,790,910];let repaired=Math.min(8,Math.floor((Date.now()-(s.roofAt||0))/700));houses.forEach((x,i)=>drawHouse(x,240,0.88,'home',s.roof&&i<repaired));
  // new buildings appear on the actual village strip when bought
  if(s.farm){
    drawHouse(755,178,1.42,'farm');
@@ -135,9 +135,10 @@ function draw(){
  if(s.loanPay>0){rect(16,72,210,25,'rgba(80,12,20,.85)');ctx.fillStyle='#ff7777';ctx.font='bold 14px Arial';ctx.fillText('ПЛАТЁЖ '+fmt(s.loanPay)+' / МЕС',23,90)}
 }
 function animateScene(){animFrame++;draw();requestAnimationFrame(animateScene)}
-$('start').addEventListener('click',()=>{$('intro').style.display='none';$('intro').classList.add('hidden');say('Игра началась! Начинай с четырёх проблем на доске. Без воды, дороги, крыш и света семьи не вернутся.');update()});$('next').onclick=day;
-$('restart').onclick=()=>{s=fresh();$('ending').classList.add('hidden');$('intro').classList.remove('hidden');update();say('Новая попытка. Планируй бюджет и не забывай о зиме.')};
-$('save').onclick=()=>{localStorage.setItem('villageSaveVideo',JSON.stringify(s));say('Игра сохранена на этом устройстве.')};
+function startAutoDays(){if(dayTimer)clearInterval(dayTimer);dayTimer=setInterval(()=>{if(gameStarted&&!s.ended&&$('event').classList.contains('hidden'))day()},10000)}
+$('start').addEventListener('click',()=>{$('intro').style.display='none';$('intro').classList.add('hidden');gameStarted=true;say('Игра началась! Время пошло: каждый 10 секунд проходит один игровой день. Начинай с четырёх проблем на доске.');update();startAutoDays()});$('next').onclick=()=>{if(!gameStarted){say('Сначала нажми «НАЧАТЬ ИГРУ».');return}day()};
+$('restart').onclick=()=>{if(dayTimer)clearInterval(dayTimer);gameStarted=false;s=fresh();$('ending').classList.add('hidden');$('event').classList.add('hidden');$('intro').classList.remove('hidden');update();say('Новая попытка. Планируй бюджет и не забывай о зиме.')};
+$('save').onclick=()=>{localStorage.setItem('villageSaveVideo',JSON.stringify({...s,gameStarted}));say('Игра сохранена на этом устройстве.')};
 animateScene();
-try{let old=JSON.parse(localStorage.getItem('villageSaveVideo'));if(old){s={...fresh(),...old};$('intro').classList.add('hidden');if(s.ended)$('ending').classList.remove('hidden')}}catch(e){}update();
+try{let old=JSON.parse(localStorage.getItem('villageSaveVideo'));if(old){s={...fresh(),...old};gameStarted=!!old.gameStarted&&!s.ended;if(gameStarted)$('intro').classList.add('hidden');if(s.ended)$('ending').classList.remove('hidden');if(gameStarted)startAutoDays()}}catch(e){}update();
 </script></body></html>
