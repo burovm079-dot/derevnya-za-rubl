@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#10243b">
+<title>Деревня за 1 рубль</title>
+<style>
+:root{--gold:#ffd34e;--red:#ff6262;--panel:#101b2beF;--muted:#aeb9c8}
+*{box-sizing:border-box}body{margin:0;background:#081421;color:#fff;font-family:system-ui,-apple-system,Segoe UI,sans-serif;overflow-x:hidden}
+.game{max-width:1100px;margin:auto;min-height:100vh;background:linear-gradient(#10243b,#101723 60%,#17130f);display:flex;flex-direction:column}
+header{padding:12px 12px 6px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;z-index:2}
+.stat{background:#101a2b;border:1px solid #526078;border-radius:8px;padding:7px 11px;min-width:100px;text-align:center;box-shadow:0 3px 0 #060c15}
+.stat small{display:block;color:#aeb9c8;font-size:9px;font-weight:800;letter-spacing:.08em}.stat b{font-size:16px}.stat.red{border-color:#a63d48}.stat.red b{color:#ff6868}.stat.gold{border-color:#b18a32}.stat.gold b{color:var(--gold)}
+.brand{text-align:center;padding:4px 10px 0}.brand h1{font-size:clamp(22px,5vw,42px);line-height:1;margin:0;font-weight:1000;text-shadow:0 3px 0 #293344}.brand span{color:var(--gold)}
+.scene{position:relative;margin:0 8px;border:1px solid #293b50;border-radius:12px;overflow:hidden;background:#182e48;min-height:310px;height:clamp(310px,48vh,510px)}
+canvas{display:block;width:100%;height:100%;touch-action:pan-y}
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#07111dcc;padding:18px}
+.dialog{max-width:430px;width:100%;background:#111d2df5;border:1px solid #64748b;border-radius:16px;padding:20px;text-align:center;box-shadow:0 18px 50px #0009}
+.dialog h2{margin:0 0 8px;font-size:25px}.dialog p{color:#c7d0dc;line-height:1.5;margin:8px 0 16px}
+button{border:0;border-radius:10px;padding:12px 14px;font-weight:850;color:#111827;background:var(--gold);font-size:14px;cursor:pointer;box-shadow:0 3px 0 #9b7021}
+button:active{transform:translateY(2px);box-shadow:0 1px 0 #9b7021}button.secondary{background:#26364c;color:#fff;box-shadow:0 3px 0 #101a29;border:1px solid #50627a}button:disabled{opacity:.4;cursor:not-allowed}
+.goal{display:flex;justify-content:space-between;gap:10px;padding:10px 14px;color:#dce5ef;font-size:12px}
+.progress{height:7px;background:#263548;border-radius:20px;overflow:hidden;margin:0 14px 12px}.progress i{display:block;height:100%;background:linear-gradient(90deg,#49c78c,#e4d34c);width:0%;transition:width .3s}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px 12px 12px}
+.action{background:#152337;border:1px solid #3c4f68;border-radius:12px;padding:10px 7px;color:#fff;text-align:left;box-shadow:0 3px 0 #080f19;min-height:85px}
+.action strong{display:block;font-size:12px;margin:4px 0}.action small{color:#aeb9c8;font-size:10px;line-height:1.25;display:block}.action .emoji{font-size:20px}
+.bottom{display:flex;gap:8px;padding:0 12px 14px}.bottom button{flex:1}.log{margin:0 12px 16px;padding:10px 12px;background:#0c1725;border:1px solid #28394d;border-radius:10px;color:#b8c5d5;font-size:11px;min-height:48px}
+.log b{color:var(--gold)}.hint{padding:0 14px 12px;color:#8594a8;font-size:10px;text-align:center}
+@media(max-width:600px){header{gap:5px}.stat{min-width:0;flex:1;padding:6px 4px}.stat b{font-size:14px}.stat small{font-size:8px}.actions{grid-template-columns:repeat(2,1fr)}.action{min-height:75px}.scene{min-height:300px;height:42vh}.goal{font-size:11px}}
+</style>
+</head>
+<body><main class="game">
+<header>
+ <div class="stat red"><small>ДО СРОКА</small><b id="days">365 ДНЕЙ</b></div>
+ <div class="stat red"><small>ЖИТЕЛИ</small><b id="people">0 / 100</b></div>
+ <div class="stat gold"><small>БЮДЖЕТ, ₽</small><b id="money">3 000 000</b></div>
+</header>
+<div class="brand"><h1>ДЕРЕВНЯ <span>ЗА 1 РУБЛЬ</span></h1></div>
+<section class="scene"><canvas id="village" width="1100" height="500"></canvas>
+<div class="overlay" id="intro"><div class="dialog"><h2>Ты купил деревню за <span style="color:#ffd34e">1 рубль</span></h2><p>В твоём распоряжении 20 пустых домов и бюджет 3 000 000 ₽. У тебя 365 дней, чтобы заселить деревню 100 жителями. Построй инфраструктуру, привлекай людей и не дай поселению обанкротиться.</p><button id="start">НАЧАТЬ РАЗВИТИЕ</button></div></div>
+<div class="overlay" id="end" style="display:none"><div class="dialog"><h2 id="endTitle">Деревня спасена!</h2><p id="endText"></p><button id="again">ИГРАТЬ ЕЩЁ РАЗ</button></div></div>
+</section>
+<div class="goal"><b>ЦЕЛЬ: заселить 100 жителей</b><span id="percent">0%</span></div><div class="progress"><i id="bar"></i></div>
+<section class="actions">
+<button class="action" id="power"><span class="emoji">💡</span><strong>Электричество</strong><small>Подключить дома · 250 000 ₽</small></button>
+<button class="action" id="water"><span class="emoji">🚰</span><strong>Водопровод</strong><small>Провести воду · 200 000 ₽</small></button>
+<button class="action" id="road"><span class="emoji">🛣️</span><strong>Дороги</strong><small>Отремонтировать · 180 000 ₽</small></button>
+<button class="action" id="ads"><span class="emoji">📣</span><strong>Звать жителей</strong><small>Реклама и переезд · 80 000 ₽</small></button>
+<button class="action" id="repair"><span class="emoji">🏠</span><strong>Ремонт домов</strong><small>Подготовить 5 домов · 120 000 ₽</small></button>
+<button class="action" id="shop"><span class="emoji">🏪</span><strong>Открыть магазин</strong><small>Рабочие места · 150 000 ₽</small></button>
+<button class="action" id="park"><span class="emoji">🌳</span><strong>Парк и досуг</strong><small>Поднять настроение · 90 000 ₽</small></button>
+<button class="action" id="loan"><span class="emoji">🏦</span><strong>Госгрант</strong><small>Запросить помощь · 0 ₽</small></button>
+</section>
+<div class="bottom"><button id="next">⏩ ПРОЖИТЬ 1 ДЕНЬ</button><button class="secondary" id="save">💾 СОХРАНИТЬ</button><button class="secondary" id="reset">↻ СНАЧАЛА</button></div>
+<div class="log" id="log"><b>День 1.</b> Деревня ждёт своего первого жителя. Начни с инфраструктуры!</div>
+<div class="hint">Игра сохраняется на этом устройстве. Подсказка: жители охотнее переезжают туда, где есть свет, вода, дороги и работа.</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const canvas=$('village'),ctx=canvas.getContext('2d');
+let s={day:1,money:3000000,people:0,power:false,water:false,road:false,repair:0,shop:false,park:false,happiness:45,grant:false,ended:false};
+const fmt=n=>Math.round(n).toLocaleString('ru-RU');
+function log(t){$('log').innerHTML='<b>День '+s.day+'.</b> '+t}
+function update(){
+ $('days').textContent=Math.max(0,366-s.day)+' ДНЕЙ';$('people').textContent=s.people+' / 100';$('money').textContent=fmt(s.money);
+ $('percent').textContent=s.people+'%';$('bar').style.width=s.people+'%';
+ ['power','water','road','shop','park'].forEach(k=>{const b=$(k);if(s[k]){b.disabled=true;b.style.opacity='.55';b.querySelector('small').textContent='Уже построено ✓'}});
+ $('repair').disabled=s.repair>=20;$('loan').disabled=s.grant;
+ draw();
+}
+function spend(n){if(s.money<n){log('Не хватает денег! Найди способ сократить расходы или получить грант.');return false}s.money-=n;return true}
+function action(k,cost,fn){if(s.ended)return;if(s[k]&&['power','water','road','shop','park'].includes(k))return;if(!spend(cost))return;fn();update()}
+$('power').onclick=()=>action('power',250000,()=>{s.power=true;s.happiness+=12;log('Электричество подключено! В домах загорелся свет.')});
+$('water').onclick=()=>action('water',200000,()=>{s.water=true;s.happiness+=12;log('Водопровод готов. Теперь в домах есть вода.')});
+$('road').onclick=()=>action('road',180000,()=>{s.road=true;s.happiness+=10;log('Дороги отремонтированы. Добраться до деревни стало проще.')});
+$('ads').onclick=()=>{if(s.people>=100)return log('Все 100 жителей уже на месте!');action('ads',80000,()=>{let n=Math.min(12,100-s.people);let bonus=(s.power?3:0)+(s.water?3:0)+(s.road?2:0)+(s.shop?2:0);n=Math.min(16,n+bonus);s.people+=n;s.happiness=Math.min(100,s.happiness+5);log('Реклама сработала: в деревню переехали '+n+' человек!')})};
+$('repair').onclick=()=>action('repair',120000,()=>{s.repair=Math.min(20,s.repair+5);s.happiness+=4;log('Отремонтировано '+Math.min(5,20-s.repair+5)+' домов. Теперь они готовы к заселению.')});
+$('shop').onclick=()=>action('shop',150000,()=>{s.shop=true;s.happiness+=8;log('Магазин открыт! Появились рабочие места и товары.')});
+$('park').onclick=()=>action('park',90000,()=>{s.park=true;s.happiness+=10;log('Парк открыт. Жителям стало приятнее жить в деревне.')});
+$('loan').onclick=()=>{if(s.grant||s.ended)return;s.grant=true;s.money+=400000;log('Одобрен грант на развитие: +400 000 ₽. Помощь выдаётся один раз.');update()};
+function nextDay(){if(s.ended)return;s.day++;let upkeep=1200+s.people*180+(s.shop?500:0)+(s.park?250:0);s.money-=upkeep;
+ if(s.day%30===0){let income=s.people*1100+(s.shop?18000:0);s.money+=income;log('Конец месяца: налоги и доходы +'+fmt(income)+' ₽, содержание −'+fmt(upkeep)+' ₽.')}
+ else if(s.day%7===0){let ready=s.repair+(s.power?5:0)+(s.water?5:0)+(s.road?5:0)+(s.shop?3:0)+(s.park?2:0);if(ready>0&&s.people<100){let n=Math.min(2,100-s.people,Math.max(0,Math.floor((s.happiness+ready)/45)));if(n){s.people+=n;log('За неделю приехали '+n+' новых жителя.')}}}
+ if(s.people===100){finish(true);return}if(s.money<0){finish(false,'Деньги закончились. Деревня не смогла оплатить расходы.');return}if(s.day>365){finish(false,'Прошло 365 дней, но цель не достигнута. Деревня осталась без будущего.');return}
+ update();if(s.day%30!==0)log('День прошёл. Расходы на содержание: −'+fmt(upkeep)+' ₽.');}
+$('next').onclick=nextDay;
+function finish(win,txt='В деревне теперь живут 100 человек! Ты выполнил условие и спас поселение.'){s.ended=true;$('endTitle').textContent=win?'ДЕРЕВНЯ СПАСЕНА!':'ДЕРЕВНЯ НЕ ВЫЖИЛА';$('endText').textContent=txt+' Итог: '+s.people+' жителей, бюджет '+fmt(s.money)+' ₽.';$('end').style.display='flex';$('next').disabled=true}
+function draw(){
+ const w=1100,h=500;ctx.clearRect(0,0,w,h);
+ let sky=ctx.createLinearGradient(0,0,0,320);sky.addColorStop(0,'#10233d');sky.addColorStop(1,'#49617a');ctx.fillStyle=sky;ctx.fillRect(0,0,w,320);
+ ctx.fillStyle='#263b50';for(let i=0;i<8;i++){ctx.beginPath();ctx.moveTo(i*170-60,230);ctx.lineTo(i*170+45,100+(i%3)*24);ctx.lineTo(i*170+150,230);ctx.fill()}
+ ctx.fillStyle='#263d31';ctx.fillRect(0,300,w,55);ctx.fillStyle='#3b3028';ctx.fillRect(0,355,w,145);ctx.fillStyle='#4c4c48';ctx.fillRect(0,350,w,7);
+ // road markings
+ ctx.strokeStyle='#b7a47b';ctx.setLineDash([30,24]);ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,425);ctx.lineTo(w,425);ctx.stroke();ctx.setLineDash([]);
+ // power poles
+ for(let x=65;x<w;x+=175){ctx.fillStyle='#654d3c';ctx.fillRect(x,120,7,235);ctx.fillRect(x-28,130,63,5);for(let j=-20;j<=20;j+=20){ctx.fillStyle='#f6d98a';ctx.beginPath();ctx.arc(x+j,139,3,0,7);ctx.fill()}}
+ // wells and village buildings
+ for(let i=0;i<10;i++){let x=i*122-8;let house=i%2===0; if(house){let repaired=i<s.repair/2;ctx.fillStyle=repaired?'#a56c43':'#79523a';ctx.fillRect(x+10,245,92,106);ctx.fillStyle='#344254';ctx.beginPath();ctx.moveTo(x,247);ctx.lineTo(x+55,184);ctx.lineTo(x+113,247);ctx.fill();ctx.fillStyle='#aeb9c1';ctx.beginPath();ctx.moveTo(x+5,242);ctx.lineTo(x+55,190);ctx.lineTo(x+108,242);ctx.fill();ctx.fillStyle='#f5d79a';ctx.fillRect(x+20,270,20,23);ctx.fillRect(x+70,270,20,23);ctx.fillStyle='#312c2a';ctx.fillRect(x+48,302,19,49);ctx.strokeStyle='#fff0c7';ctx.lineWidth=2;ctx.strokeRect(x+20,270,20,23);ctx.strokeRect(x+70,270,20,23);if(s.power){ctx.fillStyle='#ffe59b';ctx.fillRect(x+22,272,16,19);ctx.fillRect(x+72,272,16,19)}}else{ctx.fillStyle='#8b6342';ctx.fillRect(x+30,275,55,75);ctx.fillStyle='#a64e3d';ctx.beginPath();ctx.moveTo(x+22,278);ctx.lineTo(x+58,244);ctx.lineTo(x+94,278);ctx.fill();ctx.fillStyle='#b6a78c';ctx.fillRect(x+51,293,14,18)}}
+ // resident silhouettes
+ for(let i=0;i<Math.min(15,s.people);i++){let x=80+(i*71)%930,y=321+(i%2)*6;ctx.fillStyle='#30251e';ctx.beginPath();ctx.arc(x,y-22,9,0,7);ctx.fill();ctx.fillStyle=['#e68b43','#5a9db4','#b45a54','#d3b34e'][i%4];ctx.fillRect(x-8,y-14,16,23);ctx.fillStyle='#263044';ctx.fillRect(x-7,y+8,5,14);ctx.fillRect(x+2,y+8,5,14)}
+ // front hero
+ ctx.fillStyle='#30251e';ctx.beginPath();ctx.arc(548,290,12,0,7);ctx.fill();ctx.fillStyle='#e5a16c';ctx.fillRect(540,302,17,24);ctx.fillStyle='#e58b42';ctx.fillRect(536,303,25,18);ctx.fillStyle='#263044';ctx.fillRect(541,326,6,20);ctx.fillRect(551,326,6,20);
+ ctx.fillStyle='#fff';ctx.font='bold 13px system-ui';ctx.fillText(s.people+' / 100 ЖИТЕЛЕЙ',20,35);
+ ctx.fillStyle='#ffd34e';ctx.font='bold 12px system-ui';ctx.fillText((s.power?'⚡ ':'')+(s.water?'🚰 ':'')+(s.road?'🛣️ ':'')+(s.shop?'🏪 ':'')+(s.park?'🌳':''),20,58);
+}
+$('start').onclick=()=>{$('intro').style.display='none';log('Добро пожаловать! Сначала подключи коммуникации и подготовь дома.')};
+$('again').onclick=()=>{s={day:1,money:3000000,people:0,power:false,water:false,road:false,repair:0,shop:false,park:false,happiness:45,grant:false,ended:false};$('end').style.display='none';$('next').disabled=false;document.querySelectorAll('.action').forEach(b=>{b.disabled=false;b.style.opacity='1'});document.querySelectorAll('.action small').forEach((e,i)=>e.textContent=['Подключить дома · 250 000 ₽','Провести воду · 200 000 ₽','Отремонтировать · 180 000 ₽','Реклама и переезд · 80 000 ₽','Подготовить 5 домов · 120 000 ₽','Рабочие места · 150 000 ₽','Поднять настроение · 90 000 ₽','Запросить помощь · 0 ₽'][i]);update();log('Новая попытка!')};
+$('save').onclick=()=>{localStorage.setItem('derevnyaSave',JSON.stringify(s));log('Прогресс сохранён на этом устройстве.')};
+$('reset').onclick=()=>{if(confirm('Начать новую игру? Текущий прогресс будет сброшен.')){$('again').click();$('intro').style.display='none'}};
+try{let old=JSON.parse(localStorage.getItem('derevnyaSave'));if(old){s={...s,...old};if(s.ended)$('next').disabled=true;update();log('Загружено сохранение. Продолжай развитие деревни!')}}catch(e){}
+update();
+</script></body></html>
