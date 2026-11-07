@@ -95,7 +95,7 @@ function drawHouse(x,y,scale=1,kind='home',roofFixed=false,occupied=true){
  rect(-5,17,96,9,kind==='farm'?'#347b54':roofFixed?'#87949e':'#59616a');
  ctx.beginPath();ctx.moveTo(-5,18);ctx.lineTo(43,-9);ctx.lineTo(91,18);ctx.closePath();ctx.fillStyle=kind==='farm'?'#347b54':roofFixed?'#87949e':'#59616a';ctx.fill();
  for(let xx=2;xx<88;xx+=7)rect(xx,13,2,7,'rgba(20,30,40,.3)');
- for(let j=0;j<2;j++){rect(12+j*43,39,20,18,s.power&&occupied&&Math.sin(animFrame/20+j)>-.7?'#ffd77b':'#263b4d');rect(21+j*43,39,2,18,'#5c5145');rect(12+j*43,47,20,2,'#5c5145')}
+ for(let j=0;j<2;j++){rect(12+j*43,39,20,18,s.power&&Date.now()-(s.powerAt||0)>=14000&&occupied&&Math.sin(animFrame/20+j)>-.7?'#ffd77b':'#263b4d');rect(21+j*43,39,2,18,'#5c5145');rect(12+j*43,47,20,2,'#5c5145')}
  rect(39,50,15,27,'#493126');rect(43,56,2,2,'#d8c28e');
  if(s.heating||s.people>0){let smoke=(animFrame/3)%35;ctx.globalAlpha=.25;ctx.fillStyle='#cbd5dc';ctx.beginPath();ctx.arc(68,12-smoke,4+smoke/8,0,7);ctx.fill();ctx.globalAlpha=1}
  if(kind==='shop'){rect(8,24,70,9,'#f0d28a');ctx.fillStyle='#222';ctx.font='bold 8px Arial';ctx.fillText('МАГАЗИН',20,32)}
@@ -104,7 +104,7 @@ function drawHouse(x,y,scale=1,kind='home',roofFixed=false,occupied=true){
  ctx.restore();
 }
 function draw(){
- const w=1800,h=410,t=animFrame/60,night=(Math.sin(t*.16)<-.15),winter=s.day>=274,autumn=s.day>=182&&s.day<274;
+ const w=2200,h=410,t=animFrame/60,night=(Math.sin(t*.16)<-.15),winter=s.day>=274,autumn=s.day>=182&&s.day<274;
  const cameraX=s.street?800:0;ctx.save();ctx.translate(-cameraX,0);
  ctx.clearRect(0,0,w,h);
  let sky=ctx.createLinearGradient(0,0,0,320);sky.addColorStop(0,night?'#071326':'#102d50');sky.addColorStop(1,night?'#25364d':winter?'#8397a9':'#4b7180');ctx.fillStyle=sky;ctx.fillRect(0,0,w,320);
@@ -119,18 +119,17 @@ function draw(){
  ctx.strokeStyle='#4c4c4b';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(42,132);ctx.bezierCurveTo(200,165,300,95,420,132);ctx.bezierCurveTo(600,165,700,95,800,132);ctx.stroke();
  // long street and earth
  rect(0,360,w,50,'#28211f');rect(0,352,w,8,'#62705b');rect(0,366,w,3,'#9a8972');
- let roadProgress=s.road&&s.roadAt?Math.min(1,(Date.now()-s.roadAt)/18000):0,roadLength=s.street?1800:980;rect(0,320,roadLength,32,'#51463f');if(s.road){rect(0,320,roadLength*roadProgress,32,'#737b7d');for(let x=0;x<roadLength*roadProgress;x+=75)rect(x,334,35,3,'#f0e3bd');if(roadProgress<1){for(let i=0;i<10;i++){let px=(i*103+37)%roadLength;let py=326+(i%3)*9;if(px>roadLength*roadProgress){rect(px,py,26,8,'#171717');rect(px+5,py-3,13,3,'#332b27')}}}}else{for(let i=0;i<12;i++){let px=(i*83+23)%roadLength,py=326+(i%3)*9;rect(px,py,25,8,'#171717');rect(px+5,py-3,13,3,'#332b27')}}
+ let roadProgress=s.road&&s.roadAt?Math.min(1,(Date.now()-s.roadAt)/18000):0,roadLength=s.street?1900:980;rect(0,320,roadLength,32,'#51463f');if(s.road){rect(0,320,roadLength*roadProgress,32,'#737b7d');for(let x=0;x<roadLength*roadProgress;x+=75)rect(x,334,35,3,'#f0e3bd');if(roadProgress<1){for(let i=0;i<10;i++){let px=(i*103+37)%roadLength;let py=326+(i%3)*9;if(px>roadLength*roadProgress){rect(px,py,26,8,'#171717');rect(px+5,py-3,13,3,'#332b27')}}}}else{for(let i=0;i<12;i++){let px=(i*83+23)%roadLength,py=326+(i%3)*9;rect(px,py,25,8,'#171717');rect(px+5,py-3,13,3,'#332b27')}}
  // village houses laid out along one street
- let houses=Array.from({length:10},(_,i)=>(s.street?1010:18)+i*98);let occupiedCount=Math.min(10,Math.ceil(s.people/5));houses.forEach((x,i)=>{let started=s.houseRepairTimers&&s.houseRepairTimers[i];let progress=started?Math.min(1,(Date.now()-started)/4500):0;let communalRoof=s.roof&&Date.now()-(s.roofAt||0)>=18000;drawHouse(x,250,.92,'home',communalRoof||!!(s.houseRepairs&&s.houseRepairs[i]&&progress>=1),i<occupiedCount);if(started&&progress<1){rect(x+12,225,28,30,'#b68a4f');rect(x+10,220,32,3,'#e5c27c');rect(x+23,211,3,15,'#e5c27c');rect(x+8,235,4,14,'#d8b16e');rect(x+40,235,4,14,'#d8b16e');}});
+ let houses=Array.from({length:s.street?6:10},(_,i)=>(s.street?1010:18)+i*(s.street?84:98));let occupiedCount=Math.min(10,Math.ceil(s.people/5));houses.forEach((x,i)=>{let started=s.houseRepairTimers&&s.houseRepairTimers[i];let progress=started?Math.min(1,(Date.now()-started)/4500):0;let communalRoof=s.roof&&Date.now()-(s.roofAt||0)>=18000;drawHouse(x,250,s.street?.82:.92,'home',communalRoof||!!(s.houseRepairs&&s.houseRepairs[i]&&progress>=1),i<occupiedCount||!!(s.houseRepairs&&s.houseRepairs[i]));if(started&&progress<1){rect(x+12,225,28,30,'#b68a4f');rect(x+10,220,32,3,'#e5c27c');rect(x+23,211,3,15,'#e5c27c');rect(x+8,235,4,14,'#d8b16e');rect(x+40,235,4,14,'#d8b16e');}});
  // Коммунальные объекты появляются в самой деревне, а не только в меню.
  if(s.water){
    // водонапорная башня и колодец
-   rect(1135,180,9,105,'#7b8589');rect(1114,174,52,7,'#8c9698');rect(1120,144,40,31,'#8ca7ad');rect(1116,139,48,7,'#627e87');rect(1127,132,18,8,'#8ca7ad');rect(1139,175,3,110,'#65777a');
-   ctx.fillStyle='#b6dbe4';ctx.font='bold 9px Arial';ctx.fillText('ВОДА',1120,195);
+   let wp=Math.min(1,Math.max(0,(Date.now()-(s.waterAt||0))/12000));rect(1640,180,9,105,'#7b8589');rect(1619,174,52,7,'#8c9698');rect(1625,144+30*(1-wp),40,31*wp,'#8ca7ad');rect(1621,139+30*(1-wp),48,7,'#627e87');rect(1632,132+30*(1-wp),18,8,'#8ca7ad');rect(1644,175,3,110,'#65777a');ctx.fillStyle='#b6dbe4';ctx.font='bold 9px Arial';ctx.fillText('ВОДА',1625,195);
  }
  if(s.power){
    // небольшая трансформаторная подстанция
-   rect(1210,270,55,38,'#7d8582');rect(1215,251,45,20,'#9ca8a5');rect(1220,255,7,12,'#394b52');rect(1232,255,7,12,'#394b52');rect(1244,255,7,12,'#394b52');rect(1206,264,5,44,'#66533d');rect(1264,264,5,44,'#66533d');
+   rect(1730,270,55,38,'#7d8582');rect(1735,251,45,20,'#9ca8a5');rect(1740,255,7,12,'#394b52');rect(1752,255,7,12,'#394b52');rect(1764,255,7,12,'#394b52');rect(1726,264,5,44,'#66533d');rect(1784,264,5,44,'#66533d');
    if(night){ctx.shadowBlur=13;ctx.shadowColor='#ffe7a0';ctx.fillStyle='#ffe7a0';ctx.fillRect(944,276,5,5);ctx.fillRect(965,276,5,5);ctx.shadowBlur=0}
  }
  // new buildings appear on the actual village strip when bought
@@ -180,14 +179,13 @@ function draw(){
 
  if(s.internet){
    // Радиомачта и расходящиеся волны связи.
-   rect(1300,125,4,126,'#b7c0c2');rect(1284,150,36,3,'#b7c0c2');rect(1291,137,22,3,'#b7c0c2');
-   ctx.strokeStyle='rgba(123,205,231,.75)';ctx.lineWidth=2;for(let k=1;k<=3;k++){ctx.beginPath();ctx.arc(1302,130,k*10,-2.5,-.65);ctx.stroke()}
+   rect(1810,125,4,126,'#b7c0c2');rect(1794,150,36,3,'#b7c0c2');rect(1801,137,22,3,'#b7c0c2');ctx.strokeStyle='rgba(123,205,231,.75)';ctx.lineWidth=2;for(let k=1;k<=3;k++){ctx.beginPath();ctx.arc(1812,130,k*10,-2.5,-.65);ctx.stroke()}
  }
  // Жители привязаны к своим домам: возле каждого заселённого дома видна семья.
  // Часть людей спокойно стоит у калитки, часть выходит на улицу и идёт по делам.
- let occupiedHouses=s.people===1?0:Math.min(10,Math.ceil(s.people/5));
+ let occupiedHouses=s.people===1?0:Math.min(s.street?6:10,Math.ceil(s.people/5));
  for(let hIndex=0;hIndex<occupiedHouses;hIndex++){
-   let homeX=(s.street?1010:18)+hIndex*98+27;
+   let homeX=(s.street?1010:18)+hIndex*(s.street?84:98)+27;
    let familySize=Math.min(5,Math.max(1,s.people-hIndex*5));
    for(let member=0;member<familySize;member++){
      let phase=t*(0.65+member*.09)+hIndex*1.7+member*2.1;
@@ -232,7 +230,7 @@ function draw(){
  // Окна занятых домов светятся вечером, а над домами появляются маленькие таблички семей.
  if(night){
    for(let i=0;i<occupiedHouses;i++){
-     let hx=18+i*98+27;
+     let hx=(s.street?1010:18)+i*(s.street?84:98)+27;
      rect(hx+5,267,17,3,'rgba(255,220,130,.35)');
    }
  }
@@ -247,13 +245,13 @@ function draw(){
    }
  }
  // В начале дороги транспорт стоит: движение открывается только после ремонта, затем постепенно учащается.
- let trafficRoadProgress=s.road&&s.roadAt?Math.min(1,(Date.now()-s.roadAt)/18000):0;if(s.road&&trafficRoadProgress>=1){let traffic=Math.min(4,1+Math.floor(Math.max(0,s.day-1)/35));for(let v=0;v<traffic;v++){let car=((t*(24+v*8)+v*263)%1700)-130;let cy=326;rect(car,cy,74,22,['#32658b','#a84b42','#d1a23e','#557b58'][v]);rect(car+15,cy-11,39,14,'#7eb3c8');ctx.fillStyle='#15191e';ctx.beginPath();ctx.arc(car+15,cy+23,8,0,7);ctx.arc(car+60,cy+23,8,0,7);ctx.fill()}}else if(s.road){let truckX=((t*17)%1180)-100;rect(truckX,324,64,25,'#b88b42');rect(truckX+8,314,28,13,'#d8c18a');ctx.fillStyle='#171b20';ctx.beginPath();ctx.arc(truckX+13,350,8,0,7);ctx.arc(truckX+52,350,8,0,7);ctx.fill()}
+ let trafficRoadProgress=s.road&&s.roadAt?Math.min(1,(Date.now()-s.roadAt)/18000):0;if(s.road&&trafficRoadProgress>=1){let traffic=Math.min(4,1+Math.floor(Math.max(0,s.day-1)/35));for(let v=0;v<traffic;v++){let car=((t*(24+v*8)+v*263)%(roadLength-74+1));let cy=321;rect(car,cy,74,20,['#32658b','#a84b42','#d1a23e','#557b58'][v]);rect(car+15,cy-10,39,13,'#7eb3c8');ctx.fillStyle='#15191e';ctx.beginPath();ctx.arc(car+15,cy+21,7,0,7);ctx.arc(car+60,cy+21,7,0,7);ctx.fill()}}else if(s.road){let truckX=((t*17)%1180)-100;rect(truckX,324,64,25,'#b88b42');rect(truckX+8,314,28,13,'#d8c18a');ctx.fillStyle='#171b20';ctx.beginPath();ctx.arc(truckX+13,350,8,0,7);ctx.arc(truckX+52,350,8,0,7);ctx.fill()}
  // winter snow / autumn leaves
  if(winter){for(let i=0;i<110;i++){let x=(i*137+t*(8+i%4)*2)%w,y=(i*71+t*(20+i%5)*3)%315;rect(x,y,2,3,'rgba(255,255,255,.8)')}}
  if(autumn){for(let i=0;i<28;i++){let x=(i*91+t*17)%w,y=(i*43+t*21)%300;rect(x,y,3,5,'#bd783d')}}
  // Электричество загорается по улице постепенно после монтажа линии.
  if(s.power){let p=s.powerAt?Math.min(1,(Date.now()-s.powerAt)/14000):1;for(let i=0;i<10;i++){let x=18+i*98+27;if(i/10<=p){ctx.fillStyle=(night&&Math.sin(animFrame/18+i)>-.4)?'#ffe6a0':'#9ab2b9';ctx.beginPath();ctx.arc(x+43,116,3,0,7);ctx.fill();if(night){ctx.shadowBlur=10;ctx.shadowColor='#ffe7a0';ctx.fill();ctx.shadowBlur=0}}}}
- if(s.water&&!waterWork){for(let i=0;i<10;i++){let x=18+i*98+27;rect(x+5,330,35,3,'#387da4')}}
+ if(s.water&&!waterWork){for(let i=0;i<(s.street?6:10);i++){let x=(s.street?1010:18)+i*(s.street?84:98)+27;rect(x+5,330,35,3,'#387da4')}}
  // Строительные бригады: видимые этапы ремонта.
  var roadWork=s.road&&Date.now()-(s.roadAt||0)<18000;
  var waterWork=s.water&&Date.now()-(s.waterAt||0)<12000;
@@ -262,7 +260,7 @@ function draw(){
  if(waterWork){let q=(Date.now()-s.waterAt)/12000;rect(0,348,w*q,5,'#3b91c5');for(let i=0;i<4;i++){let x=(i*245+q*600)%w;rect(x,341,42,10,'#4b5960');rect(x+8,336,22,5,'#d4d9d8')}let ax=(q*950)%1100-80;rect(ax,285,68,25,'#e1d7bb');rect(ax+9,276,35,12,'#7aa8b8');ctx.fillStyle='#20242a';ctx.beginPath();ctx.arc(ax+15,311,8,0,7);ctx.arc(ax+54,311,8,0,7);ctx.fill()}
  if(roofWork){let q=(Date.now()-s.roofAt)/18000,idx=Math.min(9,Math.floor(q*10)),hx=18+idx*98+27;rect(hx-4,218,5,63,'#c69b5c');rect(hx+82,218,5,63,'#c69b5c');rect(hx-8,220,99,4,'#d8b777');rect(hx+15,210,55,5,'#c7a36d');let workerX=hx+20+Math.sin(t*4)*8;rect(workerX,229,8,11,'#e2b38c');rect(workerX-2,240,12,17,'#d49a42');rect(workerX,257,3,8,'#283342');rect(workerX+6,257,3,8,'#283342')}
  // Верхняя статистика уже показана HTML-панелью над сценой; второй HUD на canvas не рисуем.
- if(s.credit&&s.street){drawHouse(1040,216,1.05,'bank',true,true);rect(1044,240,70,5,'#e8d9b7');}
+ if(s.credit&&s.street){drawHouse(1510,216,1.05,'bank',true,true);rect(1514,240,70,5,'#e8d9b7');}
  ctx.restore();
 }
 function animateScene(){animFrame++;draw();requestAnimationFrame(animateScene)}
