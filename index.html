@@ -95,7 +95,8 @@ function drawHouse(x,y,scale=1,kind='home',roofFixed=false,occupied=true){
  rect(-5,17,96,9,kind==='farm'?'#347b54':roofFixed?'#87949e':'#59616a');
  ctx.beginPath();ctx.moveTo(-5,18);ctx.lineTo(43,-9);ctx.lineTo(91,18);ctx.closePath();ctx.fillStyle=kind==='farm'?'#347b54':roofFixed?'#87949e':'#59616a';ctx.fill();
  for(let xx=2;xx<88;xx+=7)rect(xx,13,2,7,'rgba(20,30,40,.3)');
- for(let j=0;j<2;j++){rect(12+j*43,39,20,18,s.power&&Date.now()-(s.powerAt||0)>=14000&&occupied&&(night||Math.sin(animFrame/120)>0.92)?'#ffd77b':'#263b4d');rect(21+j*43,39,2,18,'#5c5145');rect(12+j*43,47,20,2,'#5c5145')}
+ for(let j=0;j<2;j++){rect(12+j*43,39,20,18,s.power&&Date.now()-(s.powerAt||0)>=14000&&occupied&&(night||Math.sin(animFrame/120)>0.92)?'#ffd77b':'#263b4d');rect(21+j*43,39,2,18,'#5c5145');rect(12+j*43,47,20,2,'#5c5145');if(!occupied){rect(11+j*43,39,22,3,'#70513b');rect(13+j*43,44,18,3,'#70513b');rect(11+j*43,51,22,3,'#70513b')}}
+ if(!occupied){rect(2,70,8,4,'#5c4938');rect(76,69,9,4,'#5c4938');rect(6,76,3,5,'#6d8a45');rect(74,76,4,5,'#6d8a45')}
  rect(39,50,15,27,'#493126');rect(43,56,2,2,'#d8c28e');
  if(s.heating||s.people>0){let smoke=(animFrame/3)%35;ctx.globalAlpha=.25;ctx.fillStyle='#cbd5dc';ctx.beginPath();ctx.arc(68,12-smoke,4+smoke/8,0,7);ctx.fill();ctx.globalAlpha=1}
  if(kind==='shop'){rect(8,24,70,9,'#f0d28a');ctx.fillStyle='#222';ctx.font='bold 8px Arial';ctx.fillText('МАГАЗИН',20,32)}
@@ -122,6 +123,8 @@ function draw(){
  let roadProgress=s.road&&s.roadAt?Math.min(1,(Date.now()-s.roadAt)/18000):0,roadLength=s.street?1800:980;rect(0,320,roadLength,32,'#51463f');if(s.road){rect(0,320,roadLength*roadProgress,32,'#737b7d');for(let x=0;x<roadLength*roadProgress;x+=75)rect(x,334,35,3,'#f0e3bd');if(roadProgress<1){for(let i=0;i<10;i++){let px=(i*103+37)%roadLength;let py=326+(i%3)*9;if(px>roadLength*roadProgress){rect(px,py,26,8,'#171717');rect(px+5,py-3,13,3,'#332b27')}}}}else{for(let i=0;i<12;i++){let px=(i*83+23)%roadLength,py=326+(i%3)*9;rect(px,py,25,8,'#171717');rect(px+5,py-3,13,3,'#332b27')}}
  // village houses laid out along one street
  let houses=Array.from({length:s.street?6:10},(_,i)=>(s.street?1010:18)+i*(s.street?84:98));let occupiedCount=Math.min(10,Math.ceil(s.people/5));houses.forEach((x,i)=>{let started=s.houseRepairTimers&&s.houseRepairTimers[i];let progress=started?Math.min(1,(Date.now()-started)/4500):0;let communalRoof=s.roof&&Date.now()-(s.roofAt||0)>=18000;drawHouse(x,250,s.street?.82:.92,'home',communalRoof||!!(s.houseRepairs&&s.houseRepairs[i]&&progress>=1),i<occupiedCount||!!(s.houseRepairs&&s.houseRepairs[i]));if(started&&progress<1){rect(x+12,225,28,30,'#b68a4f');rect(x+10,220,32,3,'#e5c27c');rect(x+23,211,3,15,'#e5c27c');rect(x+8,235,4,14,'#d8b16e');rect(x+40,235,4,14,'#d8b16e');}});
+ // Вторая линия домов: всего в исходной деревне 20 отдельных участков, как в видео.
+ for(let i=0;i<10;i++){let x=18+i*98,idx=i+10,started=s.houseRepairTimers&&s.houseRepairTimers[idx],progress=started?Math.min(1,(Date.now()-started)/4500):0,done=!!(s.houseRepairs&&s.houseRepairs[idx]&&progress>=1);drawHouse(x,151,.66,'home',(s.roof&&Date.now()-(s.roofAt||0)>=18000)||done,!!(s.houseRepairs&&s.houseRepairs[idx]));if(started&&progress<1){rect(x+8,138,22,20,'#b68a4f');rect(x+7,135,25,3,'#e5c27c');rect(x+17,127,2,12,'#e5c27c')}}
  // Прибытие семей: микроавтобус останавливается, люди выходят и идут к домам.
  if(s.arrivalAt&&Date.now()-s.arrivalAt<16000&&s.road&&Date.now()-(s.roadAt||0)>=18000){
    let elapsed=Date.now()-s.arrivalAt,vanX=elapsed<6500?Math.max(35,520-elapsed*.055):160;
